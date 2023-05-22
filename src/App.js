@@ -1,25 +1,91 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { useState, useCallback } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+  Switch,
+} from "react-router-dom";
+import Users from "./users/pages/Users";
+import NewPlace from "./places/pages/NewPlace";
+import MainNavigation from "./shared/Navigation/MainNavigation";
+import UserPlaces from "./places/pages/UserPlaces";
+import UpdatePlace from "./places/pages/UpdatePlace";
+import Auth from "./places/pages/Auth";
+import { AuthContext } from "./shared/context/auth-context";
 
-function App() {
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const login = useCallback(() => {
+    setIsLoggedIn(true);
+  }, []);
+
+  const logout = useCallback(() => {
+    setIsLoggedIn(false);
+  }, []);
+
+  let routes;
+
+  if (isLoggedIn) {
+    routes = (
+      <Switch>
+        <Route path="/" exact>
+          <Users />
+        </Route>
+        <Route path="/:userId/places" exact>
+          <UserPlaces />
+        </Route>
+        <Route path="/places/new" exact>
+          <NewPlace />
+        </Route>
+        <Route path="/places/:placeId" exact>
+          <UpdatePlace />
+        </Route>
+        <Redirect to="/" />
+      </Switch>
+    );
+  } else {
+    routes = (
+      <Switch>
+        <Route path="/" exact>
+          <Users />
+        </Route>
+        <Route path="/:userId/places" exact>
+          <UserPlaces />
+        </Route>
+        <Route path="/auth" exact>
+          <Auth />
+        </Route>
+        <Redirect to="/auth" />
+      </Switch>
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthContext.Provider
+      value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}
+    >
+      <Router>
+        <MainNavigation />
+        <main>
+          {routes}
+        </main>
+      </Router>
+    </AuthContext.Provider>
   );
-}
+};
 
 export default App;
+
+/**
+ * Path="/" means any paths start with the '/'. Using exact means the url
+ * has to match exactly with the path
+ *
+ * The router is executed from top to bottom. even if one route matches, it will
+ * continue to execute below routes to. To prevent this (execute either only one of the routes which matches)
+ * we use "Switch" component from react-router-dom
+ *
+ * Switch Instructs that if there is a matched path inside the switch block
+ * it will not advance to the next one
+ */
