@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import axios from "axios";
 
 import "./Auth.css";
 import Card from "../../shared/components/UIElements/Card";
@@ -11,10 +12,14 @@ import {
 } from "../../shared/util/validators";
 import { useForm } from "../../shared/hooks/form-hook";
 import { AuthContext } from "../../shared/context/auth-context";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 
 const Auth = (props) => {
-    const auth = useContext(AuthContext);
+  const auth = useContext(AuthContext);
   const [isLogInMode, setIsLogInMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
   const [formState, inputHandler, setFormData] = useForm(
     {
       email: {
@@ -37,25 +42,27 @@ const Auth = (props) => {
     } else {
       let response;
       try {
-        response = await fetch('http://localhost:5000/api/users/signup', {
-          method: 'POST',
+        setIsLoading(true);
+        response = await axios.post('http://localhost:5000/api/users/signup', {
+          name: formState.inputs.name.value,
+          email: formState.inputs.email.value,
+          password: formState.inputs.password.value
+        }, {
           headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: formState.inputs.name.value,
-            email: formState.inputs.email.value,
-            password: formState.inputs.password.value
-          })
+            'Content-Type': 'application/json',
+          }
         });
 
         const responseData = await response.json();
+        console.log(responseData);
+        setIsLoading(false);
+        auth.login();
       } catch(err) {
         console.log(err);
+        setIsLoading(false);
+        setError(err.message || 'Something Went Wrong. Please Try Again');
       }
     }
-
-    auth.login();
   };
 
   const switchModeHandler = () => {
@@ -83,6 +90,7 @@ const Auth = (props) => {
 
   return (
     <Card className="authentication">
+      {isLoading && <LoadingSpinner asOverlay/>}
       <h2>Login Required</h2>
       <form onSubmit={authSubmitHandler}>
         {!isLogInMode && (
