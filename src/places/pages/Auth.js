@@ -38,10 +38,9 @@ const Auth = (props) => {
     event.preventDefault();
 
     if (isLogInMode) {
-      let response;
       try {
         setIsLoading(true);
-        response = await axios.post('http://localhost:5000/api/users/login', {
+        await axios.post('http://localhost:5000/api/users/login', {
           email: formState.inputs.email.value,
           password: formState.inputs.password.value
         }, {
@@ -56,10 +55,9 @@ const Auth = (props) => {
         setError(err.response? err.response.data.message : 'Something Went Wrong. Please Try Again');
       }
     } else {
-      let response;
       try {
         setIsLoading(true);
-        response = await axios.post('http://localhost:5000/api/users/signup', {
+        await axios.post('http://localhost:5000/api/users/signup', {
           name: formState.inputs.name.value,
           email: formState.inputs.email.value,
           password: formState.inputs.password.value

@@ -1,24 +1,56 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import UsersList from "../components/UsersList";
+import axios from "axios";
+
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 
 const Users = () => {
-  const users = [
-    {
-      id: "u1",
-      name: "Shahriar Hossain",
-      image:
-        "https://images.pexels.com/photos/5029301/pexels-photo-5029301.jpeg?cs=srgb&dl=pexels-evgenia-basyrova-5029301.jpg&fm=jpg&_gl=1*15xx69i*_ga*MTI3NDEzMjcxNi4xNjc4ODg0Nzkw*_ga_8JE65Q40S6*MTY4MDI1MDQ4My4zLjEuMTY4MDI1MDg3MC4wLjAuMA..",
-      places: 3,
-    },
-    // {
-    //   id: "u2",
-    //   name: "Syeda Mahema Jahan",
-    //   image:
-    //     "https://images.pexels.com/photos/5029301/pexels-photo-5029301.jpeg?cs=srgb&dl=pexels-evgenia-basyrova-5029301.jpg&fm=jpg&_gl=1*15xx69i*_ga*MTI3NDEzMjcxNi4xNjc4ODg0Nzkw*_ga_8JE65Q40S6*MTY4MDI1MDQ4My4zLjEuMTY4MDI1MDg3MC4wLjAuMA..",
-    //   places: 4,
-    // },
-  ];
-  return <UsersList items={users} />;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+  const [loadedUsers, setLoadedUsers] = useState();
+
+  // empty array in the second param because i want it to never rerun
+  useEffect(() => {
+    // didn't used async directly in the useEffect because it is a bad practise.
+    //useEffect do not expect a async function
+    const sendRequest = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get('http://localhost:5000/api/users', {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        setLoadedUsers(response.data.users);
+        setIsLoading(false);
+      } catch(err) {
+        setIsLoading(false);
+        setError(err.response? err.response.data.message : 'Something Went Wrong. Please Try Again');
+      }
+    }
+
+    sendRequest();
+  }, []);
+
+  const errorHandler = () => {
+    setError(null);
+  }
+
+  return (
+    <React.Fragment>
+      <ErrorModal
+        error={error}
+        onClear={errorHandler}
+      />
+      {isLoading && (
+        <div className="center">
+          <LoadingSpinner />
+        </div>
+      )}
+      {!isLoading && loadedUsers && <UsersList items={loadedUsers} />}
+    </React.Fragment>
+  );
 };
 
 export default Users;
