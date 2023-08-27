@@ -38,7 +38,23 @@ const Auth = (props) => {
     event.preventDefault();
 
     if (isLogInMode) {
-
+      let response;
+      try {
+        setIsLoading(true);
+        response = await axios.post('http://localhost:5000/api/users/login', {
+          email: formState.inputs.email.value,
+          password: formState.inputs.password.value
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        setIsLoading(false);
+        auth.login();
+      } catch (err) {
+        setIsLoading(false);
+        setError(err.response? err.response.data.message : 'Something Went Wrong. Please Try Again');
+      }
     } else {
       let response;
       try {
