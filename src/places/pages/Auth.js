@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
 
 import "./Auth.css";
 import Card from "../../shared/components/UIElements/Card";
@@ -14,12 +13,13 @@ import { useForm } from "../../shared/hooks/form-hook";
 import { AuthContext } from "../../shared/context/auth-context";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { useHttpClient } from "../../shared/hooks/http-hooks";
 
 const Auth = (props) => {
   const auth = useContext(AuthContext);
   const [isLogInMode, setIsLogInMode] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+
   const [formState, inputHandler, setFormData] = useForm(
     {
       email: {
@@ -39,40 +39,35 @@ const Auth = (props) => {
 
     if (isLogInMode) {
       try {
-        setIsLoading(true);
-        await axios.post('http://localhost:5000/api/users/login', {
-          email: formState.inputs.email.value,
-          password: formState.inputs.password.value
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
+        await sendRequest(
+          "http://localhost:5000/api/users/login",
+          "POST",
+          {
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          },
+          {
+            "Content-Type": "application/json",
           }
-        });
-        setIsLoading(false);
+        );
         auth.login();
-      } catch (err) {
-        setIsLoading(false);
-        setError(err.response? err.response.data.message : 'Something Went Wrong. Please Try Again');
-      }
+      } catch (err) {}
     } else {
       try {
-        setIsLoading(true);
-        await axios.post('http://localhost:5000/api/users/signup', {
-          name: formState.inputs.name.value,
-          email: formState.inputs.email.value,
-          password: formState.inputs.password.value
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
+        await sendRequest(
+          "http://localhost:5000/api/users/signup",
+          "POST",
+          {
+            name: formState.inputs.name.value,
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          },
+          {
+            "Content-Type": "application/json",
           }
-        });
-
-        setIsLoading(false);
+        );
         auth.login();
-      } catch(err) {
-        setIsLoading(false);
-        setError(err.response? err.response.data.message : 'Something Went Wrong. Please Try Again');
-      }
+      } catch (err) {}
     }
   };
 
@@ -86,10 +81,11 @@ const Auth = (props) => {
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
     } else {
-      setFormData({
+      setFormData(
+        {
           ...formState.inputs,
           name: {
-            value: '',
+            value: "",
             isValid: false,
           },
         },
@@ -99,15 +95,11 @@ const Auth = (props) => {
     setIsLogInMode((prevMode) => !prevMode);
   };
 
-  const errorHandler = () => {
-    setError(null);
-  }
-
   return (
     <React.Fragment>
-      <ErrorModal error={error} onClear={errorHandler} />
+      <ErrorModal error={error} onClear={clearError} />
       <Card className="authentication">
-        {isLoading && <LoadingSpinner asOverlay/>}
+        {isLoading && <LoadingSpinner asOverlay />}
         <h2>Login Required</h2>
         <form onSubmit={authSubmitHandler}>
           {!isLogInMode && (
