@@ -37,9 +37,10 @@ const Auth = (props) => {
   const authSubmitHandler = async (event) => {
     event.preventDefault();
 
+    let response;
     if (isLogInMode) {
       try {
-        await sendRequest(
+        response = await sendRequest(
           "http://localhost:5000/api/users/login",
           "POST",
           {
@@ -50,7 +51,7 @@ const Auth = (props) => {
             "Content-Type": "application/json",
           }
         );
-        auth.login();
+        auth.login(response.user.id);
       } catch (err) {}
     } else {
       try {
@@ -66,7 +67,7 @@ const Auth = (props) => {
             "Content-Type": "application/json",
           }
         );
-        auth.login();
+        auth.login(response.user.id);
       } catch (err) {}
     }
   };
