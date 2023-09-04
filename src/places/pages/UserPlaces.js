@@ -1,41 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PlaceList from "../components/PlaceList";
 import { useParams } from "react-router-dom";
-
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "One of the most famous sky scraper in the world",
-    imageUrl:
-      "https://images.unsplash.com/photo-1428366890462-dd4baecf492b?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&dl=ben-dumond-VedK8_UlmkY-unsplash.jpg",
-    address: "20 W 34th St, New York, NY 10001",
-    location: {
-      lat: "40.7484402",
-      lng: "-73.9943977",
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "Emp. State Building",
-    description: "One of the most famous sky scraper in the world",
-    imageUrl:
-      "https://images.unsplash.com/photo-1428366890462-dd4baecf492b?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&dl=ben-dumond-VedK8_UlmkY-unsplash.jpg",
-    address: "20 W 34th St, New York, NY 10001",
-    location: {
-      lat: "40.7484402",
-      lng: "-73.9943977",
-    },
-    creator: "u2",
-  },
-];
+import { useHttpClient } from "../../shared/hooks/http-hooks";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { clear } from "@testing-library/user-event/dist/clear";
 
 const UserPlaces = () => {
-//   useParams().userId; - useParams() function returns an object containing the url params.
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedPlaces, setLoadedPlaces] = useState();
+
+  //   useParams().userId; - useParams() function returns an object containing the url params.
   const userId = useParams().userId;
-  const loadedPlaces = DUMMY_PLACES.filter(place => place.creator === userId)
-  return <PlaceList items={loadedPlaces} />;
+
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      let response;
+      try {
+        response = await sendRequest(
+          'http://localhost:5000/api/places/user/' + userId,
+        );
+
+        setLoadedPlaces(response.places);
+      } catch(err) {}
+    }
+
+    fetchPlaces();
+  }, [sendRequest]); // it will only run once. as sendRequest object will be created once and wrapped within useHttpClient
+
+  return (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && (
+        <div className="center">
+          <LoadingSpinner />
+        </div>
+      )}
+      {!isLoading && loadedPlaces && <PlaceList items={loadedPlaces} />}
+    </React.Fragment>
+  );
 };
 
 export default UserPlaces;
