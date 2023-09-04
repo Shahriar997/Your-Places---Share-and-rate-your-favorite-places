@@ -24,7 +24,7 @@ export const useHttpClient = () => {
         });
 
         activeHttpRequests.current = activeHttpRequests.current.filter(
-            cancelToken => cancelToken !== cancelTokenSource
+            cancelToken => cancelToken.token !== cancelTokenSource.token
         );
 
         setIsLoading(false);
@@ -44,7 +44,7 @@ export const useHttpClient = () => {
 
   const clearError = () => {
     setError(null);
-  }
+  };
 
   useEffect(() => {
     return () => {
