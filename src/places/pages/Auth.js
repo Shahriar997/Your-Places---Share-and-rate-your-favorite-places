@@ -128,7 +128,7 @@ const Auth = (props) => {
             type="password"
             label="Password"
             validators={[VALIDATOR_MINLENGTH(6)]}
-            errorText="Enter a valid password, at least 5 character"
+            errorText="Enter a valid password, at least 6 character"
             onInput={inputHandler}
           />
           <Button type="submit" disabled={!formState.isValid}>
