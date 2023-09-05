@@ -17,15 +17,21 @@ const UserPlaces = () => {
       let response;
       try {
         response = await sendRequest(
-          'http://localhost:5000/api/places/user/' + userId,
+          "http://localhost:5000/api/places/user/" + userId
         );
 
         setLoadedPlaces(response.places);
-      } catch(err) {}
-    }
+      } catch (err) {}
+    };
 
     fetchPlaces();
   }, [sendRequest]); // it will only run once. as sendRequest object will be created once and wrapped within useHttpClient
+
+  const placeDeletedHandler = (deletedPlacesId) => {
+    setLoadedPlaces((prevPlaces) => {
+      return prevPlaces.filter((place) => place.id != deletedPlacesId);
+    });
+  };
 
   return (
     <React.Fragment>
@@ -35,7 +41,9 @@ const UserPlaces = () => {
           <LoadingSpinner />
         </div>
       )}
-      {!isLoading && loadedPlaces && <PlaceList items={loadedPlaces} />}
+      {!isLoading && loadedPlaces && (
+        <PlaceList items={loadedPlaces} onDelete={placeDeletedHandler} />
+      )}
     </React.Fragment>
   );
 };
