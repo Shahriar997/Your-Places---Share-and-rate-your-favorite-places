@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { useHttpClient } from "../../shared/hooks/http-hooks";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
-import { clear } from "@testing-library/user-event/dist/clear";
 
 const UserPlaces = () => {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
