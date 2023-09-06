@@ -4,6 +4,7 @@ import "./Auth.css";
 import Card from "../../shared/components/UIElements/Card";
 import Input from "../../shared/FormElements/Input";
 import Button from "../../shared/FormElements/Button";
+import ImageUpload from "../../shared/FormElements/ImageUpload";
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
@@ -78,6 +79,7 @@ const Auth = (props) => {
         {
           ...formState.inputs,
           name: undefined,
+          image: undefined,
         },
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -88,6 +90,10 @@ const Auth = (props) => {
           name: {
             value: "",
             isValid: false,
+          },
+          image: {
+            value: null,
+            isValid: false
           },
         },
         false
@@ -113,6 +119,7 @@ const Auth = (props) => {
               onInput={inputHandler}
             />
           )}
+          {!isLogInMode && <ImageUpload center id="image" onInput={inputHandler} />}
           <Input
             element="input"
             id="email"
