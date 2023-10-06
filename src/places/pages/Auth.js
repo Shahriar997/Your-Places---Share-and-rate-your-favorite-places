@@ -52,7 +52,7 @@ const Auth = (props) => {
             "Content-Type": "application/json",
           }
         );
-        auth.login(response.user.id);
+        auth.login(response.userId, response.token);
       } catch (err) {}
     } else {
       try {
@@ -67,7 +67,7 @@ const Auth = (props) => {
           "POST",
           formData
         );
-        auth.login(response.user.id);
+        auth.login(response.userId, response.token);
       } catch (err) {}
     }
   };
