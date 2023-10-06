@@ -1,5 +1,4 @@
 import React from "react";
-import { useState, useCallback, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -13,42 +12,10 @@ import UserPlaces from "./places/pages/UserPlaces";
 import UpdatePlace from "./places/pages/UpdatePlace";
 import Auth from "./places/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
+import { useAuth } from "./shared/hooks/auth-hook";
 
 const App = () => {
-  const [token, setToken] = useState(false);
-  const [userId, setUserId] = useState(false);
-
-  const login = useCallback((uid, token, expirationDate) => {
-    setToken(token);
-    setUserId(uid);
-    const tokenExpirationDate = expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
-    localStorage.setItem(
-      "userData",
-      JSON.stringify({
-        userId: uid,
-        token: token,
-        expiration: tokenExpirationDate.toISOString(),
-      })
-    );
-  }, []);
-
-  const logout = useCallback(() => {
-    setToken(null);
-    setUserId(null);
-    localStorage.removeItem('userData');
-  }, []);
-
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('userData'));
-    if (
-      storedData &&
-      storedData.token &&
-      new Date(storedData.expiration) > new Date()
-    ) {
-      login(storedData.userId, storedData.token, storedData.expirationDate);
-    }
-  }, [login]);
-
+  const { token, login, logout, userId } = useAuth();
   let routes;
 
   if (token) {
@@ -105,15 +72,3 @@ const App = () => {
 };
 
 export default App;
-
-/**
- * Path="/" means any paths start with the '/'. Using exact means the url
- * has to match exactly with the path
- *
- * The router is executed from top to bottom. even if one route matches, it will
- * continue to execute below routes to. To prevent this (execute either only one of the routes which matches)
- * we use "Switch" component from react-router-dom
- *
- * Switch Instructs that if there is a matched path inside the switch block
- * it will not advance to the next one
- */
