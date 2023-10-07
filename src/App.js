@@ -1,18 +1,22 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Route,
   Redirect,
   Switch,
 } from "react-router-dom";
-import Users from "./users/pages/Users";
-import NewPlace from "./places/pages/NewPlace";
+
 import MainNavigation from "./shared/Navigation/MainNavigation";
-import UserPlaces from "./places/pages/UserPlaces";
-import UpdatePlace from "./places/pages/UpdatePlace";
-import Auth from "./places/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
 import { useAuth } from "./shared/hooks/auth-hook";
+import LoadingSpinner from "./shared/components/UIElements/LoadingSpinner";
+
+// lazy function will load these scripts only when it is required
+const Users = lazy(() => import('./users/pages/Users'));
+const NewPlace = lazy(() => import('./places/pages/NewPlace'));
+const UserPlaces = lazy(() => import('./places/pages/UserPlaces'));
+const UpdatePlace = lazy(() => import('./places/pages/UpdatePlace'));
+const Auth = lazy(() => import('./places/pages/Auth'));
 
 const App = () => {
   const { token, login, logout, userId } = useAuth();
@@ -60,12 +64,22 @@ const App = () => {
         token: token,
         userId: userId,
         login: login,
-        logout: logout
+        logout: logout,
       }}
     >
       <Router>
         <MainNavigation />
-        <main>{routes}</main>
+        <main>
+          <Suspense
+            fallback={  // if lazy imports take more time, the jsx will be executed on that time
+              <div className="center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            {routes}
+          </Suspense>
+        </main>
       </Router>
     </AuthContext.Provider>
   );
